@@ -42,4 +42,17 @@ func main() {
 		AllowMethods: []string{"GET", "POST", "PUT", "DELETE"},
 		AllowCredentials: true,
 	}))
+
+	userController.RegisterUserRoutes(e)
+	productController.RegisterProductRoutes(e)
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	log.Println("Server is running on port", port)
+	if err := e.Start(":" + port); err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
 }
