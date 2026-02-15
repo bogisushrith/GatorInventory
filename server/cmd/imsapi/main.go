@@ -17,4 +17,16 @@ import (
 
 func main() {
 	envPath := filepath.Join("..", ".env")
+	err := godotenv.Load(envPath)
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	ctx := context.Background()
+	configurationManager := app.NewConfigurationManager()
+	dbPool := postgresql.GetConnectionPool(ctx, configurationManager.PostgresqlConfig)
+
+	userRepository := repository.NewUserRepository(dbPool)
+	userService := service.NewUserService(userRepository)
+	userController := controller.NewUserController(userService)
 }
