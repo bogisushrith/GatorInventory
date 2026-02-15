@@ -14,3 +14,7 @@ import (
 	"os"
 	"path/filepath"
 )
+
+func main() {
+	envPath := filepath.Join("..", ".env")
+}
