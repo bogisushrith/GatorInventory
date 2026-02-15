@@ -29,4 +29,17 @@ func main() {
 	userRepository := repository.NewUserRepository(dbPool)
 	userService := service.NewUserService(userRepository)
 	userController := controller.NewUserController(userService)
+
+	productRepository := repository.NewProductRepository(dbPool)
+	productService := service.NewProductService(productRepository)
+	productController := controller.NewProductController(productService)
+
+	e := echo.New()
+	
+	// CORS middleware
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"http://localhost:5173", "http://localhost:3000"},
+		AllowMethods: []string{"GET", "POST", "PUT", "DELETE"},
+		AllowCredentials: true,
+	}))
 }
