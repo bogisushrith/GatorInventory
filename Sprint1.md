@@ -1,5 +1,5 @@
 # GatorInventory - Sprint 1
-
+# Github Repository Link - https://github.com/bogisushrith/GatorInventory
 ## Objective
 Our first sprint aims to establish the foundational features of the GatorInventory web-based inventory management system. The focus is on setting up secure user authentication, building core inventory CRUD APIs, and developing the essential frontend components that will serve as the base for all future sprints.
 
@@ -334,3 +334,113 @@ Our first sprint aims to establish the foundational features of the GatorInvento
 *Assigned to:* Abhitej Kodakandla (Frontend), Dheeraj Kodimela (Backend)  
 *Priority:* Medium  
 *Milestone:* Sprint 2 (Not completed in Sprint 1 — category field was not finalized in the database schema during this sprint)
+
+
+## Issues Planned Based on User Stories
+
+The team planned to address 32 GitHub issues during Sprint 1, split across the backend and frontend.
+
+### Backend (19 Issues)
+
+| Issue # | Title |
+|---------|-------|
+| #2 | Start the main function |
+| #4 | Create error message and declare required variables |
+| #7 | Update CORS middleware and add more required variables |
+| #9 | Add missing route registration and server startup logic |
+| #11 | Complete Index file |
+| #21 | Initialize and Configure Project Dependencies |
+| #22 | Maintain Dependency Lock File |
+| #24 | Initial database schema for Inventory Management System |
+| #26 | Add the Product request functionality |
+| #28 | Add the UserRequest Functionality |
+| #30 | Add ProductResponse DTO and mapping functions |
+| #32 | Add ErrorResponse and LoginResponse DTOs |
+| #34 | Implement ProductController with CRUD operations |
+| #36 | Implement User Controller Endpoints |
+| #37 | Implement Product Repository Layer |
+| #38 | Implement User Repository Layer |
+| #39 | Define Service DTO Models |
+| #40 | Implement Product Service Logic |
+| #41 | Implement User Service Logic |
+
+### Frontend (13 Issues)
+
+| Issue # | Title |
+|---------|-------|
+| #13 | Create a dashboard component |
+| #14 | Create a login page component |
+| #16 | Create a sign-up component |
+| #19 | Create a root page to connect all these components |
+| #48 | Add Global App Styles |
+| #49 | Implement Root App Component |
+| #50 | Add Base CSS Styles |
+| #51 | Initialize Application Entry Point |
+| #52 | Configure Vite Build Setup |
+| #53 | Initialize TypeScript Configuration |
+| #54 | Configure Tailwind CSS |
+| #55 | Configure ESLint Rules |
+| #56 | Implement Search and Filter for Inventory Items (US-21) |
+
+---
+
+## Issues Completed
+
+31 out of 32 planned issues were successfully closed during Sprint 1.
+
+### Backend — 19/19 Completed ✅
+
+| Issue # | Title | Status |
+|---------|-------|--------|
+| #2 | Start the main function | ✅ Closed |
+| #4 | Create error message and declare required variables | ✅ Closed |
+| #7 | Update CORS middleware and add more required variables | ✅ Closed |
+| #9 | Add missing route registration and server startup logic | ✅ Closed |
+| #11 | Complete Index file | ✅ Closed |
+| #21 | Initialize and Configure Project Dependencies | ✅ Closed |
+| #22 | Maintain Dependency Lock File | ✅ Closed |
+| #24 | Initial database schema for Inventory Management System | ✅ Closed |
+| #26 | Add the Product request functionality | ✅ Closed |
+| #28 | Add the UserRequest Functionality | ✅ Closed |
+| #30 | Add ProductResponse DTO and mapping functions | ✅ Closed |
+| #32 | Add ErrorResponse and LoginResponse DTOs | ✅ Closed |
+| #34 | Implement ProductController with CRUD operations | ✅ Closed |
+| #36 | Implement User Controller Endpoints | ✅ Closed |
+| #37 | Implement Product Repository Layer | ✅ Closed |
+| #38 | Implement User Repository Layer | ✅ Closed |
+| #39 | Define Service DTO Models | ✅ Closed |
+| #40 | Implement Product Service Logic | ✅ Closed |
+| #41 | Implement User Service Logic | ✅ Closed |
+
+### Frontend — 12/13 Completed ✅
+
+| Issue # | Title | Status |
+|---------|-------|--------|
+| #13 | Create a dashboard component | ✅ Closed |
+| #14 | Create a login page component | ✅ Closed |
+| #16 | Create a sign-up component | ✅ Closed |
+| #19 | Create a root page to connect all these components | ✅ Closed |
+| #48 | Add Global App Styles | ✅ Closed |
+| #49 | Implement Root App Component | ✅ Closed |
+| #50 | Add Base CSS Styles | ✅ Closed |
+| #51 | Initialize Application Entry Point | ✅ Closed |
+| #52 | Configure Vite Build Setup | ✅ Closed |
+| #53 | Initialize TypeScript Configuration | ✅ Closed |
+| #54 | Configure Tailwind CSS | ✅ Closed |
+| #55 | Configure ESLint Rules | ✅ Closed |
+| #56 | Implement Search and Filter for Inventory Items | ❌ Not Completed |
+
+**Total: 31/32 issues completed. 1 issue incomplete.**
+
+---
+
+## Incomplete Issues
+
+| Issue # | Title | Reason |
+|---------|-------|--------|
+| #56 | Implement Search and Filter for Inventory Items | ❌ Not Completed — See below |
+
+**Issue #56 — Implement Search and Filter for Inventory Items**
+
+This feature was not completed because implementing search and filter requires the product database schema to include a category field with consistent, predefined values, which was not finalized during Sprint 1. Without a stable category structure in place, building a filter that produces meaningful and accurate results was not possible within the sprint timeline.
+Copy this directly into a new file named Sprint1.md and push it to the root of your GitHub repo.Write me prob
