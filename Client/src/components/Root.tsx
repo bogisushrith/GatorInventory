@@ -4,13 +4,16 @@ import { Link } from "react-router-dom";
 
 export const Root = () => {
     const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+    const [role, setRole] = useState<string>("");
 
     useEffect(() => {
         const token = Cookies.get("token");
         if (token) {
             setIsLoggedIn(() => true);
+            setRole((localStorage.getItem("role") || "").toLowerCase());
         } else {
             setIsLoggedIn(() => false);
+            setRole("");
         }
     }, []);
 
@@ -24,10 +27,22 @@ export const Root = () => {
                     <h1 className="text-4xl font-bold gradient-text">Inventory System</h1>
                 </div>
                 {isLoggedIn
-                    ? <Link to="dashboard"
-                            className="btn-primary">
-                        📊 Dashboard
-                    </Link>
+                    ? <div className="flex items-center gap-3">
+                        <Link
+                            to="dashboard"
+                            className="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-4 py-2 rounded-lg hover:opacity-90 transition"
+                        >
+                            📊 Dashboard
+                        </Link>
+                        {role === "admin" && (
+                            <Link
+                                to="/users"
+                                className="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-4 py-2 rounded-lg hover:opacity-90 transition"
+                            >
+                                👥 Users
+                            </Link>
+                        )}
+                    </div>
                     : <div className="flex items-center gap-3">
                         <Link to="signup"
                               className="btn-outline">
