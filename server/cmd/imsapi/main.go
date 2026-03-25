@@ -27,6 +27,14 @@ func main() {
 	dbPool := postgresql.GetConnectionPool(ctx, configurationManager.PostgresqlConfig)
 
 	userRepository := repository.NewUserRepository(dbPool)
+	err = userRepository.EnsureUserSchema()
+	if err != nil {
+		log.Fatalf("Failed to ensure user schema: %v", err)
+	}
+	err = userRepository.EnsureAdminExists()
+	if err != nil {
+		log.Fatalf("Failed to ensure admin user: %v", err)
+	}
 	userService := service.NewUserService(userRepository)
 	userController := controller.NewUserController(userService)
 
