@@ -6,7 +6,7 @@ import { ProductTable } from "./dashboard/ProductTable.tsx";
 import { StatsCards } from "./dashboard/StatsCards.tsx";
 import { Product, ProductListResponse, ProductPagination } from "./dashboard/types.ts";
 import { DashboardShell } from "./dashboard/DashboardShell.tsx";
-
+ 
 export const Dashboard = () => {
     const DEFAULT_LIMIT = 5;
     const role = (localStorage.getItem("role") || "user").toLowerCase();
