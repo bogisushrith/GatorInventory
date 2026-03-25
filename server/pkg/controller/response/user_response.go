@@ -9,9 +9,16 @@ func NewErrorResponse(errorMessage string) *ErrorResponse {
 }
 
 type LoginResponse struct {
-	Token string `json:"token"`
+	Role string `json:"role"`
 }
 
-func NewLoginResponse(token string) *LoginResponse {
-	return &LoginResponse{token}
+func NewLoginResponse(role string) *LoginResponse {
+	return &LoginResponse{role}
+}
+
+type UserSummaryResponse struct {
+	ID       int64  `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Role     string `json:"role"`
 }
