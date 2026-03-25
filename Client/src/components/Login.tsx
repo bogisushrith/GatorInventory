@@ -24,6 +24,10 @@ export const Login = () => {
             });
 
             if (response.ok) {
+                const loginResult = await response.json();
+                const role = String(loginResult.role || "user").toLowerCase();
+                localStorage.setItem("role", role);
+                localStorage.setItem("username", String(data.username || ""));
                 navigate("/dashboard");
             } else {
                 const errorData = await response.json();
@@ -108,6 +112,16 @@ export const Login = () => {
                                 <code className="bg-white px-2 py-1 rounded ml-2 text-gray-900 font-mono">Test1234</code>
                             </p>
                         </div>
+                    </div>
+
+                    {/* Sign Up Link */}
+                    <div className="text-center pt-4 border-t border-gray-200">
+                        <p className="text-gray-600 text-sm">
+                            Don't have an account?{' '}
+                            <a href="/signup" className="font-semibold text-indigo-600 hover:text-indigo-700 transition-colors">
+                                Sign up here
+                            </a>
+                        </p>
                     </div>
                 </div>
             </div>
