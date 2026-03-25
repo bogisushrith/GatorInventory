@@ -4,9 +4,9 @@ import (
 	"github.com/labstack/echo/v4"
 	"ims-intro/pkg/controller/request"
 	"ims-intro/pkg/controller/response"
-	"ims-intro/pkg/domain"
 	"ims-intro/pkg/middleware"
 	"ims-intro/pkg/service"
+	"ims-intro/pkg/service/dto"
 	"net/http"
 	"strconv"
 )
@@ -23,23 +23,57 @@ func (controller *ProductController) RegisterProductRoutes(e *echo.Echo) {
 	productsGroup := e.Group("/products")
 	productsGroup.Use(middleware.AuthMiddleware)
 
-	productsGroup.GET("", controller.GetAllProducts)
-	productsGroup.POST("", controller.AddNewProduct)
-	productsGroup.PUT("/:id", controller.UpdateProductById)
-	productsGroup.DELETE("/:id", controller.DeleteProductById)
+	productsGroup.GET("", controller.GetAllProducts, middleware.Authorize([]string{"admin", "user"}))
+	productsGroup.POST("", controller.AddNewProduct, middleware.Authorize([]string{"admin"}))
+	productsGroup.PUT("/:id", controller.UpdateProductById, middleware.Authorize([]string{"admin"}))
+	productsGroup.DELETE("/:id", controller.DeleteProductById, middleware.Authorize([]string{"admin"}))
 }
 
 func (controller *ProductController) GetAllProducts(c echo.Context) error {
-	category := c.QueryParam("category")
-	var products []*domain.Product
+	page := 1
+	limit := 5
 
-	if len(category) == 0 {
-		products = controller.productService.GetAllProducts()
-	} else {
-		products = controller.productService.GetAllProductsByCategory(category)
+	if rawPage := c.QueryParam("page"); rawPage != "" {
+		parsedPage, err := strconv.Atoi(rawPage)
+		if err == nil && parsedPage > 0 {
+			page = parsedPage
+		}
 	}
 
-	return c.JSON(http.StatusOK, response.ToProductResponseList(products))
+	if rawLimit := c.QueryParam("limit"); rawLimit != "" {
+		parsedLimit, err := strconv.Atoi(rawLimit)
+		if err == nil && parsedLimit > 0 {
+			limit = parsedLimit
+		}
+	}
+
+	if limit > 50 {
+		limit = 50
+	}
+
+	query := dto.ProductListQuery{
+		Page:     page,
+		Limit:    limit,
+		Search:   c.QueryParam("search"),
+		Category: c.QueryParam("category"),
+	}
+
+	if rawMinPrice := c.QueryParam("min_price"); rawMinPrice != "" {
+		parsedMinPrice, err := strconv.ParseFloat(rawMinPrice, 64)
+		if err == nil {
+			query.MinPrice = &parsedMinPrice
+		}
+	}
+
+	if rawMaxPrice := c.QueryParam("max_price"); rawMaxPrice != "" {
+		parsedMaxPrice, err := strconv.ParseFloat(rawMaxPrice, 64)
+		if err == nil {
+			query.MaxPrice = &parsedMaxPrice
+		}
+	}
+
+	products, total, totalPages := controller.productService.GetProducts(query)
+	return c.JSON(http.StatusOK, response.ToPaginatedProductResponse(products, query.Page, query.Limit, total, totalPages))
 }
 
 func (controller *ProductController) AddNewProduct(c echo.Context) error {
