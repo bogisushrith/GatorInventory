@@ -11,9 +11,16 @@ import (
 	"time"
 )
 
+type LoginResult struct {
+	Token string
+	Role  string
+}
+
 type IUserService interface {
 	Login(username, password string) (string, error)
 	SignUp(user dto.UserCreate) error
+	GetAllUsers() ([]dto.UserSummary, error)
+	UpdateUserRole(userID int64, role string) error
 }
 
 type UserService struct {
@@ -29,18 +36,18 @@ func (service *UserService) Login(username, password string) (string, error) {
 
 	user, err := service.userRepository.GetUserByUsername(username)
 	if err != nil {
-		return "", errors.New("no user found with the username: " + username)
+		return nil, errors.New("no user found with the username: " + username)
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
-		return "", errors.New("invalid password")
+		return nil, errors.New("invalid password")
 	}
 
 	expirationTime := time.Now().Add(24 * time.Hour)
 	claims := &domain.Claims{
-		Username: user.Username,
-		Role:     user.Role,
+		UserID: user.Id,
+		Role:   strings.ToLower(user.Role),
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 		},
@@ -52,10 +59,11 @@ func (service *UserService) Login(username, password string) (string, error) {
 		return "", errors.New("error signing the token: " + err.Error())
 	}
 
-	return tokenString, nil
+	return &LoginResult{Token: tokenString, Role: strings.ToLower(user.Role)}, nil
 }
 
 func (service *UserService) SignUp(userCreate dto.UserCreate) error {
+	userCreate.Role = "user"
 	err := validateUserCreate(userCreate)
 	if err != nil {
 		return err
@@ -80,15 +88,13 @@ func validateUserCreate(u dto.UserCreate) error {
 	if u.Password == "" {
 		return errors.New("category can't be empty")
 	}
-	if u.Role == "" {
-		return errors.New("quantity can't be empty")
-	}
 	return nil
 }
 
 func userCreateToUser(userCreate dto.UserCreate) domain.User {
 	return domain.User{
 		Username: userCreate.Username,
+		Email:    userCreate.Email,
 		Password: userCreate.Password,
 		Role:     userCreate.Role,
 	}
