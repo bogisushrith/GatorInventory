@@ -12,3 +12,20 @@ type ProductCreate struct {
 	Quantity int64
 	Category string
 }
+
+
+type ProductListQuery struct {
+	Page     int
+	Limit    int
+	Search   string
+	Category string
+	MinPrice *float64
+	MaxPrice *float64
+}
+
+type UserSummary struct {
+	ID       int64
+	Username string
+	Email    string
+	Role     string
+}
