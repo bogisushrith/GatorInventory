@@ -33,6 +33,20 @@ func (service *ProductService) Add(productCreate *dto.ProductCreate) error {
 	return service.productRepository.AddProduct(product)
 }
 
+func (service *ProductService) GetProducts(query dto.ProductListQuery) ([]*domain.Product, int64, int) {
+	products, total, err := service.productRepository.GetProducts(query)
+	if err != nil {
+		return []*domain.Product{}, 0, 0
+	}
+
+	totalPages := 0
+	if total > 0 && query.Limit > 0 {
+		totalPages = int(math.Ceil(float64(total) / float64(query.Limit)))
+	}
+
+	return products, total, totalPages
+}
+
 func (service *ProductService) GetAllProducts() []*domain.Product {
 	return service.productRepository.GetAllProducts()
 }
