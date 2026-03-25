@@ -89,7 +89,6 @@ export const SignUp = () => {
                                 id="email"
                                 name="email"
                                 type="email"
-                                required
                                 placeholder="Enter your email"
                                 className="w-full rounded-lg border-2 border-gray-200 px-4 py-2.5 text-gray-900 placeholder:text-gray-400 focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-100 transition-all"
                             />
