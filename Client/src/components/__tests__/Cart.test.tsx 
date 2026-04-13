@@ -1,0 +1,73 @@
+import { fireEvent, render, screen } from '@testing-library/react';
+import { Cart } from '../Cart';
+import { useCart } from '../../context/CartContext';
+
+const navigateMock = vi.fn();
+const updateItemMock = vi.fn();
+const removeItemMock = vi.fn();
+
+vi.mock('../../context/CartContext', () => ({
+  useCart: vi.fn(),
+}));
+
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual<typeof import('react-router-dom')>('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: () => navigateMock,
+  };
+});
+
+vi.mock('../dashboard/DashboardShell', () => ({
+  DashboardShell: ({ children }: { children: unknown }) => <div>{children as any}</div>,
+}));
+
+describe('Cart', () => {
+  beforeEach(() => {
+    navigateMock.mockReset();
+    updateItemMock.mockReset();
+    removeItemMock.mockReset();
+
+    vi.mocked(useCart).mockReturnValue({
+      cartItems: [
+        {
+          id: 1,
+          user_id: 1,
+          product_id: 10,
+          quantity: 2,
+          product_name: 'Laptop',
+          product_price: 1500,
+          product_stock: 10,
+        },
+      ],
+      loading: false,
+      refreshCart: vi.fn(),
+      addItem: vi.fn(),
+      updateItem: updateItemMock,
+      removeItem: removeItemMock,
+      clearClientCart: vi.fn(),
+      totalQuantity: 2,
+    });
+  });
+
+  it('displays cart items and quantity', () => {
+    render(<Cart />);
+
+    expect(screen.getByText('Laptop')).toBeInTheDocument();
+    expect(screen.getByText('2')).toBeInTheDocument();
+    expect(screen.getByText('Total: $3000.00')).toBeInTheDocument();
+  });
+
+  it('updates quantity when + and - buttons are clicked', () => {
+    render(<Cart />);
+
+    const plusButton = screen.getByRole('button', { name: '+' });
+    const minusButton = screen.getByRole('button', { name: '−' });
+
+    fireEvent.click(plusButton);
+    fireEvent.click(minusButton);
+
+    expect(updateItemMock).toHaveBeenNthCalledWith(1, 10, 3);
+    expect(updateItemMock).toHaveBeenNthCalledWith(2, 10, 1);
+  });
+});
