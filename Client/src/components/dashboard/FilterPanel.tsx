@@ -8,7 +8,7 @@ interface FilterPanelProps {
     maxPriceInput: string;
     onMaxPriceChange: (value: string) => void;
     categories: string[];
-    onReset: () => void;
+    onReset: () => void; 
     onApply: () => void;
     hasPendingChanges: boolean;
     loading: boolean;
