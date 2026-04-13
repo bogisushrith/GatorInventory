@@ -42,17 +42,36 @@ func main() {
 	productService := service.NewProductService(productRepository)
 	productController := controller.NewProductController(productService)
 
+	cartRepository := repository.NewCartRepository(dbPool)
+	err = cartRepository.EnsureCartSchema()
+	if err != nil {
+		log.Fatalf("Failed to ensure cart schema: %v", err)
+	}
+	cartService := service.NewCartService(cartRepository, productRepository)
+	cartController := controller.NewCartController(cartService)
+
+	orderRepository := repository.NewOrderRepository(dbPool)
+	err = orderRepository.EnsureOrderSchema()
+	if err != nil {
+		log.Fatalf("Failed to ensure order schema: %v", err)
+	}
+	orderItemRepository := repository.NewOrderItemRepository(dbPool)
+	orderService := service.NewOrderService(orderRepository, orderItemRepository, productRepository, cartRepository)
+	orderController := controller.NewOrderController(orderService)
+
 	e := echo.New()
-	
+
 	// CORS middleware
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"http://localhost:5173", "http://localhost:3000"},
-		AllowMethods: []string{"GET", "POST", "PUT", "DELETE"},
+		AllowOrigins:     []string{"http://localhost:5173", "http://localhost:3000"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
 		AllowCredentials: true,
 	}))
 
 	userController.RegisterUserRoutes(e)
 	productController.RegisterProductRoutes(e)
+	cartController.RegisterCartRoutes(e)
+	orderController.RegisterOrderRoutes(e)
 
 	port := os.Getenv("PORT")
 	if port == "" {
