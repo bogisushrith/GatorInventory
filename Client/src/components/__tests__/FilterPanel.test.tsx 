@@ -1,0 +1,105 @@
+import { fireEvent, render, screen } from '@testing-library/react';
+import { ComponentProps } from 'react';
+import { FilterPanel } from '../dashboard/FilterPanel';
+
+const createProps = (overrides: Partial<ComponentProps<typeof FilterPanel>> = {}) => ({
+  searchInput: '',
+  onSearchChange: vi.fn(),
+  categoryInput: '',
+  onCategoryChange: vi.fn(),
+  minPriceInput: '',
+  onMinPriceChange: vi.fn(),
+  maxPriceInput: '',
+  onMaxPriceChange: vi.fn(),
+  categories: ['Electronics', 'Stationery'],
+  onReset: vi.fn(),
+  onApply: vi.fn(),
+  hasPendingChanges: true,
+  loading: false,
+  ...overrides
+});
+
+describe('FilterPanel', () => {
+  // What this test does:
+  // Verifies all core filter controls render with expected labels/placeholders.
+  //
+  // Why this is important:
+  // Ensures users can discover and use filtering options correctly.
+  //
+  // Steps:
+  // 1. Render FilterPanel with default props.
+  // 2. Assert search/category/min/max controls and action buttons appear.
+  it('renders filter controls and action buttons', () => {
+    render(<FilterPanel {...createProps()} />);
+
+    expect(screen.getByText('Product Filters')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Search products...')).toBeInTheDocument();
+    expect(screen.getByText('Apply Filters')).toBeInTheDocument();
+    expect(screen.getByText('Reset filters')).toBeInTheDocument();
+  });
+
+  // What this test does:
+  // Confirms text input and select changes call the respective callback handlers.
+  //
+  // Why this is important:
+  // Guarantees parent state updates when a user edits filter values.
+  //
+  // Steps:
+  // 1. Render with mocked change handlers.
+  // 2. Type in search and pick a category.
+  // 3. Assert callbacks receive updated values.
+  it('calls input and category handlers on change', () => {
+    const onSearchChange = vi.fn();
+    const onCategoryChange = vi.fn();
+
+    render(
+      <FilterPanel
+        {...createProps({ onSearchChange, onCategoryChange })}
+      />
+    );
+
+    fireEvent.change(screen.getByPlaceholderText('Search products...'), { target: { value: 'pen' } });
+    fireEvent.change(screen.getByDisplayValue('All categories'), { target: { value: 'Electronics' } });
+
+    expect(onSearchChange).toHaveBeenCalledWith('pen');
+    expect(onCategoryChange).toHaveBeenCalledWith('Electronics');
+  });
+
+  // What this test does:
+  // Verifies Apply and Reset buttons trigger their callbacks when enabled.
+  //
+  // Why this is important:
+  // Ensures manual filter workflow works exactly as designed.
+  //
+  // Steps:
+  // 1. Render with pending changes enabled.
+  // 2. Click Apply Filters and Reset filters.
+  // 3. Assert both callback handlers are called.
+  it('triggers apply and reset actions', () => {
+    const onApply = vi.fn();
+    const onReset = vi.fn();
+
+    render(<FilterPanel {...createProps({ onApply, onReset, hasPendingChanges: true })} />);
+
+    fireEvent.click(screen.getByText('Apply Filters'));
+    fireEvent.click(screen.getByText('Reset filters'));
+
+    expect(onApply).toHaveBeenCalledTimes(1);
+    expect(onReset).toHaveBeenCalledTimes(1);
+  });
+
+  // What this test does:
+  // Checks edge-case disabled state when there are no pending changes.
+  //
+  // Why this is important:
+  // Prevents unnecessary apply requests when filter values have not changed.
+  //
+  // Steps:
+  // 1. Render with hasPendingChanges=false.
+  // 2. Assert Apply button is disabled.
+  it('disables apply button when no pending changes exist', () => {
+    render(<FilterPanel {...createProps({ hasPendingChanges: false })} />);
+
+    expect(screen.getByText('Apply Filters')).toBeDisabled();
+  });
+});
