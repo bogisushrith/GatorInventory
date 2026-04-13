@@ -1,19 +1,20 @@
-import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { ReactNode } from "react";
 import { Link } from "react-router-dom";
 
 interface DashboardShellProps {
     role: string;
-    activeTab: "products" | "users";
+    activeTab: "products" | "cart" | "checkout" | "history" | "users" | "orders";
     title: string;
     subtitle: string;
     onLogout: () => Promise<void> | void;
     children: ReactNode;
+    headerActions?: ReactNode;
     contentVariant?: "stack" | "grid";
     showSidebar?: boolean;
 }
 
-export const DashboardShell = ({ role, activeTab, title, subtitle, onLogout, children, contentVariant = "stack", showSidebar = true }: DashboardShellProps) => {
-    const normalizedRole = role.toLowerCase();
+export const DashboardShell = ({ role, activeTab, title, subtitle, children, headerActions, contentVariant = "stack", showSidebar = true }: DashboardShellProps) => {
+    const isAdmin = role.toLowerCase() === "admin";
     const contentContainerClassName = contentVariant === "grid"
         ? "lg:col-span-3 min-w-0 grid grid-cols-1 lg:grid-cols-3 gap-6 items-start"
         : "lg:col-span-3 min-w-0 flex flex-col gap-6";
@@ -23,34 +24,6 @@ export const DashboardShell = ({ role, activeTab, title, subtitle, onLogout, chi
     const headerClassName = contentVariant === "grid"
         ? `${showSidebar ? "lg:col-span-3" : "lg:col-span-4"} flex justify-between items-center gap-3`
         : "flex justify-between items-center gap-3";
-    const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
-    const profileMenuRef = useRef<HTMLDivElement | null>(null);
-
-    const username = useMemo(() => {
-        return (localStorage.getItem("username") || "User").trim() || "User";
-    }, []);
-
-    const initials = useMemo(() => {
-        return username.charAt(0).toUpperCase();
-    }, [username]);
-
-    const formattedRole = useMemo(() => {
-        return normalizedRole === "admin" ? "Admin" : "User";
-    }, [normalizedRole]);
-
-    useEffect(() => {
-        const handleOutsideClick = (event: MouseEvent) => {
-            const target = event.target as Node;
-            if (profileMenuRef.current && !profileMenuRef.current.contains(target)) {
-                setIsMenuOpen(false);
-            }
-        };
-
-        document.addEventListener("mousedown", handleOutsideClick);
-        return () => {
-            document.removeEventListener("mousedown", handleOutsideClick);
-        };
-    }, []);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 via-indigo-50 to-pink-50">
@@ -70,6 +43,58 @@ export const DashboardShell = ({ role, activeTab, title, subtitle, onLogout, chi
                                 >
                                     Products
                                 </Link>
+                                {!isAdmin && (
+                                    <>
+                                        <Link
+                                            to="/cart"
+                                            className={[
+                                                "block rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200",
+                                                activeTab === "cart"
+                                                    ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md"
+                                                    : "text-gray-700 hover:bg-indigo-50"
+                                            ].join(" ")}
+                                        >
+                                            Cart
+                                        </Link>
+                                        <Link
+                                            to="/history"
+                                            className={[
+                                                "block rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200",
+                                                activeTab === "history"
+                                                    ? "bg-gradient-to-r from-sky-500 to-cyan-500 text-white shadow-md"
+                                                    : "text-gray-700 hover:bg-indigo-50"
+                                            ].join(" ")}
+                                        >
+                                            History
+                                        </Link>
+                                    </>
+                                )}
+                                {isAdmin && (
+                                    <>
+                                        <Link
+                                            to="/orders"
+                                            className={[
+                                                "block rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200",
+                                                activeTab === "orders"
+                                                    ? "bg-gradient-to-r from-sky-500 to-cyan-500 text-white shadow-md"
+                                                    : "text-gray-700 hover:bg-indigo-50"
+                                            ].join(" ")}
+                                        >
+                                            Orders
+                                        </Link>
+                                        <Link
+                                            to="/users"
+                                            className={[
+                                                "block rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200",
+                                                activeTab === "users"
+                                                    ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md"
+                                                    : "text-gray-700 hover:bg-indigo-50"
+                                            ].join(" ")}
+                                        >
+                                            Users
+                                        </Link>
+                                    </>
+                                )}
                             </nav>
                         </aside>
 
@@ -80,49 +105,13 @@ export const DashboardShell = ({ role, activeTab, title, subtitle, onLogout, chi
                                     <p className="text-gray-500 text-sm mt-1">{subtitle}</p>
                                 </div>
                                 <div className="flex items-center gap-3">
+                                    {headerActions}
                                     <Link
                                         to="/"
                                         className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-all duration-200"
                                     >
                                         🏠 Home
                                     </Link>
-
-                                    <div className="relative" ref={profileMenuRef}>
-                                        <button
-                                            type="button"
-                                            onClick={() => setIsMenuOpen((previous) => !previous)}
-                                            className="w-10 h-10 rounded-full bg-gray-200 text-gray-700 font-semibold flex items-center justify-center cursor-pointer hover:bg-gray-300 transition-all duration-200"
-                                            aria-haspopup="menu"
-                                            aria-expanded={isMenuOpen}
-                                            aria-label="Open profile menu"
-                                        >
-                                            {initials}
-                                        </button>
-
-                                        <div
-                                            className={[
-                                                "absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 p-2 transition-all duration-200 z-20",
-                                                isMenuOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"
-                                            ].join(" ")}
-                                            role="menu"
-                                        >
-                                            <div className="px-3 py-2">
-                                                <p className="text-sm font-semibold text-gray-900 truncate">{username}</p>
-                                                <p className="text-xs text-gray-500 mt-1">{formattedRole}</p>
-                                            </div>
-
-                                            <div className="h-px bg-gray-100 my-1" />
-
-                                            <button
-                                                type="button"
-                                                onClick={onLogout}
-                                                className="w-full text-left rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all duration-200"
-                                                role="menuitem"
-                                            >
-                                                🚪 Logout
-                                            </button>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
 
@@ -137,49 +126,13 @@ export const DashboardShell = ({ role, activeTab, title, subtitle, onLogout, chi
                                 <p className="text-gray-500 text-sm mt-1">{subtitle}</p>
                             </div>
                             <div className="flex items-center gap-3">
+                                {headerActions}
                                 <Link
                                     to="/"
                                     className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-all duration-200"
                                 >
                                     🏠 Home
                                 </Link>
-
-                                <div className="relative" ref={profileMenuRef}>
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsMenuOpen((previous) => !previous)}
-                                        className="w-10 h-10 rounded-full bg-gray-200 text-gray-700 font-semibold flex items-center justify-center cursor-pointer hover:bg-gray-300 transition-all duration-200"
-                                        aria-haspopup="menu"
-                                        aria-expanded={isMenuOpen}
-                                        aria-label="Open profile menu"
-                                    >
-                                        {initials}
-                                    </button>
-
-                                    <div
-                                        className={[
-                                            "absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 p-2 transition-all duration-200 z-20",
-                                            isMenuOpen ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"
-                                        ].join(" ")}
-                                        role="menu"
-                                    >
-                                        <div className="px-3 py-2">
-                                            <p className="text-sm font-semibold text-gray-900 truncate">{username}</p>
-                                            <p className="text-xs text-gray-500 mt-1">{formattedRole}</p>
-                                        </div>
-
-                                        <div className="h-px bg-gray-100 my-1" />
-
-                                        <button
-                                            type="button"
-                                            onClick={onLogout}
-                                            className="w-full text-left rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all duration-200"
-                                            role="menuitem"
-                                        >
-                                            🚪 Logout
-                                        </button>
-                                    </div>
-                                </div>
                             </div>
                         </div>
 
