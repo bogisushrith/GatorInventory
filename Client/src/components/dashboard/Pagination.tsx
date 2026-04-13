@@ -2,7 +2,7 @@ interface PaginationProps {
     page: number;
     totalPages: number;
     loading: boolean;
-    onPageChange: (nextPage: number) => void;
+    onPageChange: (nextPage: number) => void; 
 }
 
 export const Pagination = ({ page, totalPages, loading, onPageChange }: PaginationProps) => {
