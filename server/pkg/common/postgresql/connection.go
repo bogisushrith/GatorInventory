@@ -29,6 +29,5 @@ func GetConnectionPool(context context.Context, config Config) *pgxpool.Pool {
 		log.Errorf("Unable to connect to database: %v", err)
 		panic(err)
 	}
-
 	return conn
 }
