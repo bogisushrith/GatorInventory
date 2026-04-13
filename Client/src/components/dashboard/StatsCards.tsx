@@ -12,7 +12,7 @@ export const StatsCards = ({ products, totalResults }: StatsCardsProps) => {
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-white rounded-2xl shadow-md p-5 transition-all duration-200 hover:-translate-y-0.5">
-                <p className="text-sm text-gray-500 mb-2">📊 Total Matching Results</p>
+                <p className="text-sm text-gray-500 mb-2">📊 Total Matching Results</p> 
                 <p className="text-lg font-semibold text-gray-900">{totalResults}</p>
             </div>
             <div className="bg-white rounded-2xl shadow-md p-5 transition-all duration-200 hover:-translate-y-0.5">
