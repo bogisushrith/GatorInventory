@@ -1,7 +1,9 @@
 package service
 
 import (
+	"context"
 	"errors"
+	"github.com/jackc/pgx/v4"
 	"ims-intro/pkg/domain"
 	"ims-intro/pkg/service/dto"
 	"testing"
@@ -41,6 +43,12 @@ type mockProductRepository struct {
 	capturedQuery     dto.ProductListQuery
 
 	checkExistenceErr error
+
+	updateQuantityResult *domain.Product
+	updateQuantityErr    error
+
+	capturedStockProductID int64
+	capturedStockQuantity  int
 }
 
 func (mockRepo *mockProductRepository) GetProducts(query dto.ProductListQuery) ([]*domain.Product, int64, error) {
@@ -50,6 +58,14 @@ func (mockRepo *mockProductRepository) GetProducts(query dto.ProductListQuery) (
 
 func (mockRepo *mockProductRepository) GetAllProducts() []*domain.Product {
 	return []*domain.Product{}
+}
+
+func (mockRepo *mockProductRepository) GetProductByID(productID int64) (*domain.Product, error) {
+	return nil, nil
+}
+
+func (mockRepo *mockProductRepository) GetProductByIDTx(ctx context.Context, tx pgx.Tx, productID int64) (*domain.Product, error) {
+	return nil, nil
 }
 
 func (mockRepo *mockProductRepository) GetProductsByCategory(category string) []*domain.Product {
@@ -67,6 +83,20 @@ func (mockRepo *mockProductRepository) CheckProductExistence(productId int64) er
 }
 
 func (mockRepo *mockProductRepository) UpdateProductById(updatedProduct *domain.Product, productId int64) error {
+	return nil
+}
+
+func (mockRepo *mockProductRepository) UpdateProductQuantityByID(productID int64, quantity int) (*domain.Product, error) {
+	mockRepo.capturedStockProductID = productID
+	mockRepo.capturedStockQuantity = quantity
+	return mockRepo.updateQuantityResult, mockRepo.updateQuantityErr
+}
+
+func (mockRepo *mockProductRepository) UpdateProductStock(productID int64, quantity int) error {
+	return nil
+}
+
+func (mockRepo *mockProductRepository) UpdateProductStockTx(ctx context.Context, tx pgx.Tx, productID int64, quantity int) error {
 	return nil
 }
 
@@ -253,5 +283,58 @@ func TestProductService_GetProducts_Failure_RepositoryError(t *testing.T) {
 	}
 	if totalPages != 0 {
 		t.Fatalf("expected totalPages 0 on failure, got %d", totalPages)
+	}
+}
+
+func TestProductService_UpdateStockById_Success(t *testing.T) {
+	mockRepo := &mockProductRepository{
+		updateQuantityResult: &domain.Product{Id: 1, Name: "Laptop", Quantity: 12, Category: "Electronics"},
+	}
+	service := NewProductService(mockRepo)
+
+	updatedProduct, err := service.UpdateStockById(1, 12)
+
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if updatedProduct == nil {
+		t.Fatalf("expected updated product, got nil")
+	}
+	if updatedProduct.Quantity != 12 {
+		t.Fatalf("expected quantity 12, got %d", updatedProduct.Quantity)
+	}
+	if mockRepo.capturedStockProductID != 1 {
+		t.Fatalf("expected product id 1, got %d", mockRepo.capturedStockProductID)
+	}
+	if mockRepo.capturedStockQuantity != 12 {
+		t.Fatalf("expected quantity 12, got %d", mockRepo.capturedStockQuantity)
+	}
+}
+
+func TestProductService_UpdateStockById_InvalidQuantity(t *testing.T) {
+	mockRepo := &mockProductRepository{}
+	service := NewProductService(mockRepo)
+
+	updatedProduct, err := service.UpdateStockById(1, -1)
+
+	if !errors.Is(err, ErrInvalidQuantity) {
+		t.Fatalf("expected ErrInvalidQuantity, got %v", err)
+	}
+	if updatedProduct != nil {
+		t.Fatalf("expected nil product for invalid quantity")
+	}
+}
+
+func TestProductService_UpdateStockById_ProductNotFound(t *testing.T) {
+	mockRepo := &mockProductRepository{updateQuantityErr: pgx.ErrNoRows}
+	service := NewProductService(mockRepo)
+
+	updatedProduct, err := service.UpdateStockById(999, 4)
+
+	if !errors.Is(err, ErrProductNotFound) {
+		t.Fatalf("expected ErrProductNotFound, got %v", err)
+	}
+	if updatedProduct != nil {
+		t.Fatalf("expected nil product when not found")
 	}
 }
