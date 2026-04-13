@@ -1,0 +1,60 @@
+import { fireEvent, render, screen } from '@testing-library/react';
+import { Pagination } from '../dashboard/Pagination';
+
+describe('Pagination', () => {
+  // What this test does:
+  // Verifies pagination is hidden when there is only one page.
+  //
+  // Why this is important:
+  // Avoids cluttering UI with unnecessary controls.
+  //
+  // Steps:
+  // 1. Render Pagination with totalPages=1.
+  // 2. Assert navigation buttons are not rendered.
+  it('does not render controls when total pages are 1 or less', () => {
+    render(<Pagination page={1} totalPages={1} loading={false} onPageChange={vi.fn()} />);
+
+    expect(screen.queryByText('Previous')).not.toBeInTheDocument();
+    expect(screen.queryByText('Next')).not.toBeInTheDocument();
+  });
+
+  // What this test does:
+  // Confirms clicking Previous/Next/page number triggers expected page change values.
+  //
+  // Why this is important:
+  // Ensures pagination navigation drives correct parent state updates.
+  //
+  // Steps:
+  // 1. Render with page=3 and totalPages=7.
+  // 2. Click Previous, Next, and page 4.
+  // 3. Verify callback received 2, 4, and 4.
+  it('calls onPageChange when navigation controls are clicked', () => {
+    const onPageChange = vi.fn();
+
+    render(<Pagination page={3} totalPages={7} loading={false} onPageChange={onPageChange} />);
+
+    fireEvent.click(screen.getByText('Previous'));
+    fireEvent.click(screen.getByText('Next'));
+    fireEvent.click(screen.getByText('4'));
+
+    expect(onPageChange).toHaveBeenCalledWith(2);
+    expect(onPageChange).toHaveBeenCalledWith(4);
+  });
+
+  // What this test does:
+  // Verifies edge-case disabled state on first page and while loading.
+  //
+  // Why this is important:
+  // Prevents invalid navigation and duplicate requests.
+  //
+  // Steps:
+  // 1. Render first page with loading enabled.
+  // 2. Assert Previous is disabled and page buttons are disabled.
+  it('disables controls correctly on boundaries and loading', () => {
+    render(<Pagination page={1} totalPages={3} loading={true} onPageChange={vi.fn()} />);
+
+    expect(screen.getByText('Previous')).toBeDisabled();
+    expect(screen.getByText('1')).toBeDisabled();
+    expect(screen.getByText('2')).toBeDisabled();
+  });
+});
