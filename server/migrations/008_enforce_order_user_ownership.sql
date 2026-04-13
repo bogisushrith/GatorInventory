@@ -6,4 +6,4 @@ DELETE FROM orders
 WHERE user_id IS NULL;
 
 ALTER TABLE orders
-ALTER COLUMN user_id SET NOT NULL;
+ALTER COLUMN user_id SET NOT NULL; 
