@@ -15,16 +15,13 @@ UNIT TESTING CONCEPTS (BACKEND - SERVICE LAYER)
 1) What is unit testing in backend?
    - Unit testing verifies one small unit of code in isolation (here: ProductService methods).
    - We test business rules without running real database or HTTP server.
-
 2) Why test service layer instead of controller or DB first?
    - Service layer contains business logic (validation, pagination math, decision rules).
    - Controller tests are more about HTTP request/response wiring.
    - DB tests are integration concerns and are slower/flakier for quick feedback.
-
 3) What is mocking and why do we use it?
    - A mock is a fake implementation of a dependency (repository) with controlled outputs.
    - We use mocks to make tests deterministic, fast, and independent from real DB state.
-
 4) Unit vs Integration vs End-to-End (E2E)
    - Unit test: one function/class in isolation with mocks.
    - Integration test: multiple layers work together (often with real DB).
