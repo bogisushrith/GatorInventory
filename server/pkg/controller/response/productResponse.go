@@ -6,8 +6,9 @@ type ProductResponse struct {
 	Id       int64   `json:"id"`
 	Name     string  `json:"name"`
 	Price    float32 `json:"price"`
-	Quantity int64   `json:"quantity"`
+	Quantity int     `json:"quantity"`
 	Category string  `json:"category"`
+	ImageURL string  `json:"image_url"`
 }
 
 type ProductPaginationResponse struct {
@@ -29,7 +30,12 @@ func toProductResponse(product *domain.Product) *ProductResponse {
 		Price:    product.Price,
 		Quantity: product.Quantity,
 		Category: product.Category,
+		ImageURL: product.ImageURL,
 	}
+}
+
+func ToProductResponse(product *domain.Product) *ProductResponse {
+	return toProductResponse(product)
 }
 
 func ToProductResponseList(products []*domain.Product) []*ProductResponse {
