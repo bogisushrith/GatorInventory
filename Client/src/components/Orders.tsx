@@ -82,13 +82,14 @@ export const Orders = () => {
         <DashboardShell
             role={role}
             activeTab="orders"
-            title="All Orders"
+            title="All Sales"
             subtitle="Manage customer orders across the system"
             onLogout={handleLogout}
-            contentVariant="grid"
-            showSidebar={true}
+            contentVariant="stack"
+            showSidebar={false}
+            fullWidth={true}
         >
-            <div className="lg:col-span-3 space-y-6">
+            <div className="space-y-6">
                 <OrderSummaryCards totalOrders={orders.length} totalRevenue={totalRevenue} />
 
                 <OrderFilters
@@ -115,7 +116,7 @@ export const Orders = () => {
                 <div className="bg-white rounded-2xl shadow-md overflow-hidden">
                     <div className="border-b border-gray-100 px-5 py-4 flex flex-wrap items-center justify-between gap-3">
                         <div>
-                            <h3 className="text-xl font-semibold text-gray-900">Order Management</h3>
+                            <h3 className="text-xl font-semibold text-gray-900">Sales Management</h3>
                             <p className="text-sm text-gray-500">Click View Details to inspect any order</p>
                         </div>
                         <p className="text-sm text-gray-500">{orders.length} order(s)</p>
