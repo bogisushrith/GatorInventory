@@ -39,6 +39,12 @@ func main() {
 	userController := controller.NewUserController(userService)
 
 	productRepository := repository.NewProductRepository(dbPool)
+	if productSchemaEnsurer, ok := productRepository.(interface{ EnsureProductSchema() error }); ok {
+		err = productSchemaEnsurer.EnsureProductSchema()
+		if err != nil {
+			log.Fatalf("Failed to ensure product schema: %v", err)
+		}
+	}
 	productService := service.NewProductService(productRepository)
 	productController := controller.NewProductController(productService)
 
@@ -59,6 +65,18 @@ func main() {
 	orderService := service.NewOrderService(orderRepository, orderItemRepository, productRepository, cartRepository)
 	orderController := controller.NewOrderController(orderService)
 
+	analyticsRepository := repository.NewAnalyticsRepository(dbPool)
+	err = analyticsRepository.EnsureSeedData()
+	if err != nil {
+		log.Fatalf("Failed to ensure analytics seed data: %v", err)
+	}
+	analyticsService := service.NewAnalyticsService(analyticsRepository)
+	analyticsController := controller.NewAnalyticsController(analyticsService)
+
+	userAnalyticsRepository := repository.NewUserAnalyticsRepository(dbPool)
+	userAnalyticsService := service.NewUserAnalyticsService(userAnalyticsRepository)
+	userAnalyticsController := controller.NewUserAnalyticsController(userAnalyticsService)
+
 	e := echo.New()
 
 	// CORS middleware
@@ -72,6 +90,8 @@ func main() {
 	productController.RegisterProductRoutes(e)
 	cartController.RegisterCartRoutes(e)
 	orderController.RegisterOrderRoutes(e)
+	analyticsController.RegisterAnalyticsRoutes(e)
+	userAnalyticsController.RegisterUserAnalyticsRoutes(e)
 
 	port := os.Getenv("PORT")
 	if port == "" {
