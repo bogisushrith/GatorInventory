@@ -25,3 +25,4 @@ export const updateProductStock = async (productId: number, quantity: number): P
 
     return response.json() as Promise<Product>;
 };
+
