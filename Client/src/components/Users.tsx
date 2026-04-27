@@ -86,13 +86,14 @@ export const Users = () => {
             title="User Management"
             subtitle="Manage user roles and permissions"
             onLogout={handleLogout}
-            contentVariant="grid"
+            contentVariant="stack"
             showSidebar={false}
+            fullWidth={true}
         >
-            {error && <div className="lg:col-span-3 bg-red-50 border-l-4 border-red-500 p-5 rounded-lg text-red-700">❌ {error}</div>}
-            {successMessage && <div className="lg:col-span-3 bg-green-50 border-l-4 border-green-500 p-5 rounded-lg text-green-700">✅ {successMessage}</div>}
+            {error && <div className="bg-red-50 border-l-4 border-red-500 p-5 rounded-lg text-red-700">❌ {error}</div>}
+            {successMessage && <div className="bg-green-50 border-l-4 border-green-500 p-5 rounded-lg text-green-700">✅ {successMessage}</div>}
 
-            <div className="lg:col-span-3 min-w-0 h-full">
+            <div className="w-full min-w-0 h-full">
                 <div className="bg-white rounded-2xl shadow-md overflow-hidden h-full">
                     <div className="p-5 border-b border-gray-100">
                         <div className="flex justify-between items-center gap-4">
@@ -129,7 +130,7 @@ export const Users = () => {
                                                 <span className={[
                                                     "inline-flex px-3 py-1 rounded-full text-xs font-semibold",
                                                     user.role === "admin" ? "bg-indigo-100 text-indigo-700" : "bg-cyan-100 text-cyan-700"
-                                                ].join(" ") + " mx-auto"}>
+                                                ].join(" ")}>
                                                     {user.role}
                                                 </span>
                                             </td>
@@ -137,7 +138,7 @@ export const Users = () => {
                                                 <select
                                                     value={user.role}
                                                     onChange={(event) => handleRoleChange(user.id, event.target.value as "admin" | "user")}
-                                                    className="rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-100 bg-white mx-auto"
+                                                    className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm focus:border-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-100"
                                                 >
                                                     <option value="user">user</option>
                                                     <option value="admin">admin</option>
@@ -154,4 +155,3 @@ export const Users = () => {
         </DashboardShell>
     );
 };
-
