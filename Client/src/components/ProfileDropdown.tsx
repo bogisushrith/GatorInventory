@@ -35,7 +35,7 @@ export const ProfileDropdown = () => {
             localStorage.removeItem("role");
             localStorage.removeItem("username");
             setIsOpen(false);
-            navigate("/login");
+            navigate("/");
         }
     };
 
