@@ -5,8 +5,13 @@ import "ims-intro/pkg/service/dto"
 type AddProductRequest struct {
 	Name     string  `json:"name"`
 	Price    float32 `json:"price"`
-	Quantity int64   `json:"quantity"`
+	Quantity int     `json:"quantity"`
 	Category string  `json:"category"`
+	ImageURL string  `json:"image_url"`
+}
+
+type UpdateProductStockRequest struct {
+	Quantity int `json:"quantity"`
 }
 
 func (request *AddProductRequest) ToModel() *dto.ProductCreate {
@@ -15,5 +20,6 @@ func (request *AddProductRequest) ToModel() *dto.ProductCreate {
 		Price:    request.Price,
 		Quantity: request.Quantity,
 		Category: request.Category,
+		ImageURL: request.ImageURL,
 	}
 }
