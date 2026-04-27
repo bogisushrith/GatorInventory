@@ -1,0 +1,114 @@
+export interface SummaryResponse {
+    totalRevenue: number;
+    totalOrders: number;
+    totalProducts: number;
+    lowStockCount: number;
+}
+
+export interface RevenuePoint {
+    date: string;
+    value: number;
+}
+
+export interface OrderPoint {
+    date: string;
+    value: number;
+}
+
+export interface ProductAnalytics {
+    productId: number;
+    name: string;
+    totalSold: number;
+    revenue: number;
+}
+
+export interface LowStockProduct {
+    productId: number;
+    name: string;
+    quantity: number;
+    category: string;
+}
+
+export interface AnalyticsBundle {
+    summary: SummaryResponse;
+    revenueTrend: RevenuePoint[];
+    orderTrend: OrderPoint[];
+    topProducts: ProductAnalytics[];
+    lowStockProducts: LowStockProduct[];
+}
+
+export type AnalyticsDays = 7 | 30 | 90;
+
+export const fallbackAnalyticsBundle: AnalyticsBundle = {
+    summary: {
+        totalRevenue: 2960,
+        totalOrders: 4,
+        totalProducts: 4,
+        lowStockCount: 0,
+    },
+    revenueTrend: [
+        { date: "2026-04-21", value: 2400 },
+        { date: "2026-04-23", value: 125 },
+        { date: "2026-04-24", value: 135 },
+        { date: "2026-04-25", value: 300 },
+    ],
+    orderTrend: [
+        { date: "2026-04-21", value: 1 },
+        { date: "2026-04-23", value: 1 },
+        { date: "2026-04-24", value: 1 },
+        { date: "2026-04-25", value: 1 },
+    ],
+    topProducts: [
+        { productId: 1, name: "Laptop", totalSold: 2, revenue: 2400 },
+        { productId: 2, name: "Mouse", totalSold: 5, revenue: 125 },
+        { productId: 3, name: "Keyboard", totalSold: 3, revenue: 135 },
+        { productId: 4, name: "Monitor", totalSold: 1, revenue: 300 },
+    ],
+    lowStockProducts: [],
+};
+
+const buildQuery = (days: AnalyticsDays, threshold = 10) => {
+    const query = new URLSearchParams();
+    query.set("days", String(days));
+    query.set("threshold", String(threshold));
+    query.set("top_limit", "5");
+    query.set("low_stock_limit", "10");
+    return query.toString();
+};
+
+const parseErrorMessage = async (response: Response, fallback: string) => {
+    try {
+        const errorPayload = await response.json() as { error_message?: string; message?: string };
+        if (errorPayload.error_message && errorPayload.error_message.trim().length > 0) {
+            return errorPayload.error_message;
+        }
+        if (errorPayload.message && errorPayload.message.trim().length > 0) {
+            return errorPayload.message;
+        }
+        return fallback;
+    } catch {
+        return fallback;
+    }
+};
+
+const getJson = async <T>(path: string): Promise<T> => {
+    const response = await fetch(path, { credentials: "include" });
+    if (!response.ok) {
+        throw new Error(await parseErrorMessage(response, "Analytics fetch failed"));
+    }
+    return response.json() as Promise<T>;
+};
+
+export const getAnalyticsBundle = async (days: AnalyticsDays, threshold = 10): Promise<AnalyticsBundle> => {
+    const query = buildQuery(days, threshold);
+
+    const [summary, revenueTrend, orderTrend, topProducts, lowStockProducts] = await Promise.all([
+        getJson<SummaryResponse>(`/api/analytics/summary?${query}`),
+        getJson<RevenuePoint[]>(`/api/analytics/revenue-trend?${query}`),
+        getJson<OrderPoint[]>(`/api/analytics/order-trend?${query}`),
+        getJson<ProductAnalytics[]>(`/api/analytics/top-products?${query}`),
+        getJson<LowStockProduct[]>(`/api/analytics/low-stock?${query}`),
+    ]);
+
+    return { summary, revenueTrend, orderTrend, topProducts, lowStockProducts };
+};
