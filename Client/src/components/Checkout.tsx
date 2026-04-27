@@ -52,12 +52,13 @@ export const Checkout = () => {
             title="Checkout"
             subtitle="Confirm order details and place your order"
             onLogout={handleLogout}
-            contentVariant="grid"
-            showSidebar={true}
+            contentVariant="stack"
+            showSidebar={false}
+            fullWidth={true}
         >
-            {errorMessage && <div className="lg:col-span-3 rounded-lg border border-red-200 bg-red-50 text-red-700 px-4 py-3 text-sm font-medium">{errorMessage}</div>}
+            {errorMessage && <div className="rounded-lg border border-red-200 bg-red-50 text-red-700 px-4 py-3 text-sm font-medium">{errorMessage}</div>}
 
-            <div className="lg:col-span-3 bg-white rounded-2xl shadow-md p-5">
+            <div className="w-full bg-white rounded-2xl shadow-md p-5">
                 {cartItems.length === 0 ? (
                     <p className="text-sm text-gray-500">No items to checkout.</p>
                 ) : (
