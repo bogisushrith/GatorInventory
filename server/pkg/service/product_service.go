@@ -2,16 +2,26 @@ package service
 
 import (
 	"errors"
+	"github.com/jackc/pgx/v4"
 	"ims-intro/pkg/domain"
 	"ims-intro/pkg/repository"
 	"ims-intro/pkg/service/dto"
+	"math"
+)
+
+var (
+	ErrProductNotFound = errors.New("product not found")
+	ErrInvalidQuantity = errors.New("quantity can't be less than zero")
 )
 
 type IProductService interface {
 	Add(productCreate *dto.ProductCreate) error
+	GetProducts(query dto.ProductListQuery) ([]*domain.Product, int64, int)
+	GetFeaturedProducts(limit int) []*domain.Product
 	GetAllProducts() []*domain.Product
 	GetAllProductsByCategory(category string) []*domain.Product
 	UpdateProductById(updatedProduct *dto.ProductCreate, productId int64) error
+	UpdateStockById(productId int64, quantity int) (*domain.Product, error)
 	DeleteById(productId int64) error
 }
 
@@ -51,32 +61,62 @@ func (service *ProductService) GetAllProducts() []*domain.Product {
 	return service.productRepository.GetAllProducts()
 }
 
+func (service *ProductService) GetFeaturedProducts(limit int) []*domain.Product {
+	products, err := service.productRepository.GetFeaturedProducts(limit)
+	if err != nil {
+		return []*domain.Product{}
+	}
+	return products
+}
+
 func (service *ProductService) GetAllProductsByCategory(category string) []*domain.Product {
 	return service.productRepository.GetProductsByCategory(category)
 }
 
 func (service *ProductService) UpdateProductById(updatedProduct *dto.ProductCreate, productId int64) error {
-	err := service.productRepository.CheckProductExistence(productId)
-	if err != nil {
-		return nil
-	}
-
-	err = validateProductCreate(updatedProduct)
+	err := validateProductCreate(updatedProduct)
 	if err != nil {
 		return err
 	}
 
 	product := productCreateToProduct(updatedProduct)
-	return service.productRepository.UpdateProductById(product, productId)
+	err = service.productRepository.UpdateProductById(product, productId)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return ErrProductNotFound
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (service *ProductService) UpdateStockById(productId int64, quantity int) (*domain.Product, error) {
+	if quantity < 0 {
+		return nil, ErrInvalidQuantity
+	}
+
+	updatedProduct, err := service.productRepository.UpdateProductQuantityByID(productId, quantity)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrProductNotFound
+		}
+		return nil, err
+	}
+
+	return updatedProduct, nil
 }
 
 func (service *ProductService) DeleteById(productId int64) error {
-	err := service.productRepository.CheckProductExistence(productId)
+	err := service.productRepository.DeleteProductById(productId)
 	if err != nil {
-		return nil
+		if errors.Is(err, pgx.ErrNoRows) {
+			return ErrProductNotFound
+		}
+		return err
 	}
 
-	return service.productRepository.DeleteProductById(productId)
+	return nil
 }
 
 func validateProductCreate(productCreate *dto.ProductCreate) error {
@@ -87,7 +127,7 @@ func validateProductCreate(productCreate *dto.ProductCreate) error {
 		return errors.New("price can't be less than zero")
 	}
 	if productCreate.Quantity < 0 {
-		return errors.New("quantity can't be less than zero")
+		return ErrInvalidQuantity
 	}
 	if productCreate.Category == "" {
 		return errors.New("category can't be empty")
