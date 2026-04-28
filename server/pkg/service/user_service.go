@@ -8,6 +8,7 @@ import (
 	"ims-intro/pkg/repository"
 	"ims-intro/pkg/service/dto"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -17,7 +18,7 @@ type LoginResult struct {
 }
 
 type IUserService interface {
-	Login(username, password string) (string, error)
+	Login(username, password string) (*LoginResult, error)
 	SignUp(user dto.UserCreate) error
 	GetAllUsers() ([]dto.UserSummary, error)
 	UpdateUserRole(userID int64, role string) error
@@ -31,7 +32,7 @@ func NewUserService(userRepository repository.IUserRepository) IUserService {
 	return &UserService{userRepository}
 }
 
-func (service *UserService) Login(username, password string) (string, error) {
+func (service *UserService) Login(username, password string) (*LoginResult, error) {
 	jwtKey := os.Getenv("JWT_KEY")
 
 	user, err := service.userRepository.GetUserByUsername(username)
@@ -56,7 +57,7 @@ func (service *UserService) Login(username, password string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString([]byte(jwtKey))
 	if err != nil {
-		return "", errors.New("error signing the token: " + err.Error())
+		return nil, errors.New("error signing the token: " + err.Error())
 	}
 
 	return &LoginResult{Token: tokenString, Role: strings.ToLower(user.Role)}, nil
@@ -64,6 +65,7 @@ func (service *UserService) Login(username, password string) (string, error) {
 
 func (service *UserService) SignUp(userCreate dto.UserCreate) error {
 	userCreate.Role = "user"
+
 	err := validateUserCreate(userCreate)
 	if err != nil {
 		return err
@@ -81,12 +83,25 @@ func (service *UserService) SignUp(userCreate dto.UserCreate) error {
 	return service.userRepository.SignUp(user)
 }
 
+func (service *UserService) GetAllUsers() ([]dto.UserSummary, error) {
+	return service.userRepository.GetAllUsers()
+}
+
+func (service *UserService) UpdateUserRole(userID int64, role string) error {
+	normalizedRole := strings.ToLower(strings.TrimSpace(role))
+	if normalizedRole != "admin" && normalizedRole != "user" {
+		return errors.New("invalid role: allowed values are admin or user")
+	}
+
+	return service.userRepository.UpdateUserRole(userID, normalizedRole)
+}
+
 func validateUserCreate(u dto.UserCreate) error {
 	if u.Username == "" {
 		return errors.New("username can't be empty")
 	}
 	if u.Password == "" {
-		return errors.New("category can't be empty")
+		return errors.New("password can't be empty")
 	}
 	return nil
 }
