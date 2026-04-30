@@ -12,6 +12,7 @@ import (
 	"ims-intro/pkg/service/dto"
 )
 
+
 type analyticsControllerServiceMock struct {
 	query dto.AnalyticsQuery
 
